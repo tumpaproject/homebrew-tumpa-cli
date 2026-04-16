@@ -1,10 +1,11 @@
 class TumpaCli < Formula
   desc "OpenPGP CLI and SSH agent backed by tumpa keystore"
   homepage "https://tumpa.rocks"
-  version "0.1.1"
   license "GPL-3.0-or-later"
 
   on_macos do
+    depends_on "pinentry-mac"
+
     on_arm do
       url "https://github.com/tumpaproject/tumpa-cli/releases/download/v0.1.1/tumpa-cli-aarch64-apple-darwin.tar.gz"
       sha256 "a864df0756905bcaff10332032be67decd3195c298c45ce1e14823482aacfe81"

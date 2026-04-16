@@ -37,10 +37,10 @@ jobs:
           raise "empty VERSION"               if version.empty?
           shas.each { |k, v| raise "empty sha256 for #{k}" if v.nil? || v.empty? }
 
-          content.sub!(/^(\s*version\s+)"[^"]*"/, "\\1\"#{version}\"") \
-            or raise "version line not found"
-
-          content.gsub!(%r{/download/v[^/]+/tumpa-cli-}, "/download/v#{version}/tumpa-cli-")
+          # Version is inferred by Homebrew from the /v<version>/ segment
+          # in the release URL, so we only rewrite URLs and SHAs here.
+          content.gsub!(%r{/download/v[^/]+/tumpa-cli-}, "/download/v#{version}/tumpa-cli-") \
+            or raise "no release URL found in formula"
 
           shas.each do |triple, sha|
             replaced = content.sub!(
