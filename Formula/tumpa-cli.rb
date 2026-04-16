@@ -1,8 +1,8 @@
 class TumpaCli < Formula
   desc "OpenPGP CLI and SSH agent backed by tumpa keystore"
   homepage "https://tumpa.rocks"
-  url "https://github.com/tumpaproject/tumpa-cli/archive/refs/tags/v0.1.0.tar.gz"
-  sha256 "REPLACE_WITH_ACTUAL_SHA256"
+  url "https://github.com/tumpaproject/tumpa-cli/archive/refs/tags/v0.1.1.tar.gz"
+  sha256 "0bbcd0cf7d0e4e248490ec63757df37945e91aa8e3062d23a94a8ff47b559660"
   license "GPL-3.0-or-later"
   head "https://github.com/tumpaproject/tumpa-cli.git", branch: "main"
 
