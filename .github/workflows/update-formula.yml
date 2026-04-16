@@ -1,0 +1,41 @@
+name: Update Formula
+
+on:
+  repository_dispatch:
+    types: [update-formula]
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout tap
+        uses: actions/checkout@v4
+
+      - name: Update formula
+        run: |
+          VERSION="${{ github.event.client_payload.version }}"
+          URL="${{ github.event.client_payload.url }}"
+          SHA256="${{ github.event.client_payload.sha256 }}"
+
+          echo "Updating formula to v${VERSION}"
+          echo "  URL: ${URL}"
+          echo "  SHA256: ${SHA256}"
+
+          sed -i "s|url \".*\"|url \"${URL}\"|" Formula/tumpa-cli.rb
+          sed -i "s|sha256 \".*\"|sha256 \"${SHA256}\"|" Formula/tumpa-cli.rb
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          title: "Update tumpa-cli to v${{ github.event.client_payload.version }}"
+          body: |
+            Automated update triggered by [tumpa-cli release](https://github.com/tumpaproject/tumpa-cli/releases/tag/v${{ github.event.client_payload.version }}).
+
+            - Version: `${{ github.event.client_payload.version }}`
+            - SHA256: `${{ github.event.client_payload.sha256 }}`
+          branch: "update-v${{ github.event.client_payload.version }}"
+          commit-message: "Update tumpa-cli to v${{ github.event.client_payload.version }}"
