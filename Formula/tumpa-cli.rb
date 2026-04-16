@@ -1,23 +1,33 @@
 class TumpaCli < Formula
   desc "OpenPGP CLI and SSH agent backed by tumpa keystore"
   homepage "https://tumpa.rocks"
-  url "https://github.com/tumpaproject/tumpa-cli/archive/refs/tags/v0.1.1.tar.gz"
-  sha256 "0bbcd0cf7d0e4e248490ec63757df37945e91aa8e3062d23a94a8ff47b559660"
+  version "0.1.1"
   license "GPL-3.0-or-later"
-  head "https://github.com/tumpaproject/tumpa-cli.git", branch: "main"
 
-  depends_on "rust" => :build
+  on_macos do
+    on_arm do
+      url "https://github.com/tumpaproject/tumpa-cli/releases/download/v0.1.1/tumpa-cli-aarch64-apple-darwin.tar.gz"
+      sha256 "a864df0756905bcaff10332032be67decd3195c298c45ce1e14823482aacfe81"
+    end
+    on_intel do
+      url "https://github.com/tumpaproject/tumpa-cli/releases/download/v0.1.1/tumpa-cli-x86_64-apple-darwin.tar.gz"
+      sha256 "2efc0ead3cf094576dab945cbb18e12cfeed2f249f007dee0d44609e1a6e4e18"
+    end
+  end
+
+  on_linux do
+    on_intel do
+      url "https://github.com/tumpaproject/tumpa-cli/releases/download/v0.1.1/tumpa-cli-x86_64-unknown-linux-gnu.tar.gz"
+      sha256 "7ec5b7e801ff61ab1df97f8816645d03bd7ee95f442649efb013392111b9b4fb"
+    end
+  end
 
   def install
-    system "cargo", "install", *std_cargo_args
-
-    # tcli completions (clap-generated)
+    bin.install "tcli", "tpass"
     generate_completions_from_executable(bin/"tcli", "--completions")
-
-    # tpass completions (hand-written, with password entry listing)
-    bash_completion.install "completions/tpass.bash" => "tpass"
-    zsh_completion.install "completions/tpass.zsh" => "_tpass"
-    fish_completion.install "completions/tpass.fish"
+    bash_completion.install "tpass.bash" => "tpass"
+    zsh_completion.install "tpass.zsh" => "_tpass"
+    fish_completion.install "tpass.fish"
   end
 
   service do

@@ -16,17 +16,42 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Update formula
+        env:
+          VERSION: ${{ github.event.client_payload.version }}
+          SHA_AARCH64_APPLE_DARWIN: ${{ github.event.client_payload.sha256.aarch64_apple_darwin }}
+          SHA_X86_64_APPLE_DARWIN: ${{ github.event.client_payload.sha256.x86_64_apple_darwin }}
+          SHA_X86_64_UNKNOWN_LINUX_GNU: ${{ github.event.client_payload.sha256.x86_64_unknown_linux_gnu }}
         run: |
-          VERSION="${{ github.event.client_payload.version }}"
-          URL="${{ github.event.client_payload.url }}"
-          SHA256="${{ github.event.client_payload.sha256 }}"
-
           echo "Updating formula to v${VERSION}"
-          echo "  URL: ${URL}"
-          echo "  SHA256: ${SHA256}"
+          ruby <<'RUBY'
+          path = 'Formula/tumpa-cli.rb'
+          content = File.read(path)
 
-          sed -i "s|url \".*\"|url \"${URL}\"|" Formula/tumpa-cli.rb
-          sed -i "s|sha256 \".*\"|sha256 \"${SHA256}\"|" Formula/tumpa-cli.rb
+          version = ENV.fetch('VERSION')
+          shas = {
+            'aarch64-apple-darwin'     => ENV.fetch('SHA_AARCH64_APPLE_DARWIN'),
+            'x86_64-apple-darwin'      => ENV.fetch('SHA_X86_64_APPLE_DARWIN'),
+            'x86_64-unknown-linux-gnu' => ENV.fetch('SHA_X86_64_UNKNOWN_LINUX_GNU'),
+          }
+
+          raise "empty VERSION"               if version.empty?
+          shas.each { |k, v| raise "empty sha256 for #{k}" if v.nil? || v.empty? }
+
+          content.sub!(/^(\s*version\s+)"[^"]*"/, "\\1\"#{version}\"") \
+            or raise "version line not found"
+
+          content.gsub!(%r{/download/v[^/]+/tumpa-cli-}, "/download/v#{version}/tumpa-cli-")
+
+          shas.each do |triple, sha|
+            replaced = content.sub!(
+              /(url\s+"[^"]*tumpa-cli-#{Regexp.escape(triple)}\.tar\.gz"\s*\n\s*sha256\s+)"[^"]*"/,
+              "\\1\"#{sha}\"",
+            )
+            raise "url/sha256 block for #{triple} not found" unless replaced
+          end
+
+          File.write(path, content)
+          RUBY
 
       - name: Create pull request
         uses: peter-evans/create-pull-request@v7
@@ -37,6 +62,8 @@ jobs:
             Automated update triggered by [tumpa-cli release](https://github.com/tumpaproject/tumpa-cli/releases/tag/v${{ github.event.client_payload.version }}).
 
             - Version: `${{ github.event.client_payload.version }}`
-            - SHA256: `${{ github.event.client_payload.sha256 }}`
+            - aarch64-apple-darwin: `${{ github.event.client_payload.sha256.aarch64_apple_darwin }}`
+            - x86_64-apple-darwin: `${{ github.event.client_payload.sha256.x86_64_apple_darwin }}`
+            - x86_64-unknown-linux-gnu: `${{ github.event.client_payload.sha256.x86_64_unknown_linux_gnu }}`
           branch: "update-v${{ github.event.client_payload.version }}"
           commit-message: "Update tumpa-cli to v${{ github.event.client_payload.version }}"
