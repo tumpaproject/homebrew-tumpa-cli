@@ -7,19 +7,19 @@ class TumpaCli < Formula
     depends_on "pinentry-mac"
 
     on_arm do
-      url "https://github.com/tumpaproject/tumpa-cli/releases/download/v0.1.1/tumpa-cli-aarch64-apple-darwin.tar.gz"
-      sha256 "a864df0756905bcaff10332032be67decd3195c298c45ce1e14823482aacfe81"
+      url "https://github.com/tumpaproject/tumpa-cli/releases/download/v0.2.0/tumpa-cli-aarch64-apple-darwin.tar.gz"
+      sha256 "16fa3b59f18d87fee0843c311cb4e0e58e07a1a8019b4414f57c399ad983f4ad"
     end
     on_intel do
-      url "https://github.com/tumpaproject/tumpa-cli/releases/download/v0.1.1/tumpa-cli-x86_64-apple-darwin.tar.gz"
-      sha256 "2efc0ead3cf094576dab945cbb18e12cfeed2f249f007dee0d44609e1a6e4e18"
+      url "https://github.com/tumpaproject/tumpa-cli/releases/download/v0.2.0/tumpa-cli-x86_64-apple-darwin.tar.gz"
+      sha256 "83afcfe631b82644c99f018ae7e1e4bc4b8edccba50cf438902a959536298bef"
     end
   end
 
   on_linux do
     on_intel do
-      url "https://github.com/tumpaproject/tumpa-cli/releases/download/v0.1.1/tumpa-cli-x86_64-unknown-linux-gnu.tar.gz"
-      sha256 "7ec5b7e801ff61ab1df97f8816645d03bd7ee95f442649efb013392111b9b4fb"
+      url "https://github.com/tumpaproject/tumpa-cli/releases/download/v0.2.0/tumpa-cli-x86_64-unknown-linux-gnu.tar.gz"
+      sha256 "40981d474e714575b85679049f89602fd2c89dff9b3cb40d1527623ff41ee13d"
     end
   end
 
