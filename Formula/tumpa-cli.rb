@@ -24,7 +24,7 @@ class TumpaCli < Formula
   end
 
   def install
-    bin.install "tcli", "tpass"
+    bin.install "tcli", "tclig", "tpass"
     generate_completions_from_executable(bin/"tcli", "--completions")
     bash_completion.install "tpass.bash" => "tpass"
     zsh_completion.install "tpass.zsh" => "_tpass"
