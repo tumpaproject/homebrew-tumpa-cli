@@ -25,7 +25,7 @@ class TumpaCli < Formula
 
   def install
     bin.install "tcli", "tclig", "tpass"
-    generate_completions_from_executable(bin/"tcli", "--completions")
+    generate_completions_from_executable(bin/"tcli", "completions")
     bash_completion.install "tpass.bash" => "tpass"
     zsh_completion.install "tpass.zsh" => "_tpass"
     fish_completion.install "tpass.fish"
@@ -47,7 +47,7 @@ class TumpaCli < Formula
         export SSH_AUTH_SOCK="$HOME/.tumpa/tcli-ssh.sock"
 
       Import your OpenPGP key:
-        tcli --import /path/to/your/secret-key.asc
+        tcli import /path/to/your/secret-key.asc
 
       Configure git:
         git config --global gpg.program tcli
