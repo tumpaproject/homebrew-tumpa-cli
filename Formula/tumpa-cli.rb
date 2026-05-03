@@ -5,6 +5,7 @@ class TumpaCli < Formula
 
   on_macos do
     depends_on "pinentry-mac"
+    depends_on "terminal-notifier"
 
     on_arm do
       url "https://github.com/tumpaproject/tumpa-cli/releases/download/v0.5.1/tumpa-cli-aarch64-apple-darwin.tar.gz"
