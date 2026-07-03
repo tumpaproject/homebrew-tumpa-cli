@@ -144,6 +144,64 @@ class TumpaCli < Formula
       fi
     SCRIPT
     chmod 0755, bin/"setup-tumpa-agent"
+
+    (bin/"restart-tumpa-agent").write <<~SCRIPT
+      #!/bin/bash
+      # Restart the Tumpa user LaunchAgent, or start it if it is not
+      # running. Requires the plist installed by setup-tumpa-agent.
+      set -euo pipefail
+
+      LABEL="in.kushaldas.tumpa.agent"
+      TARGET="$HOME/Library/LaunchAgents/${LABEL}.plist"
+      DOMAIN="gui/$(id -u)"
+      LOG_PATH="#{var}/log/tumpa-agent.log"
+
+      if [ ! -f "$TARGET" ]; then
+        echo "ERROR: $TARGET not found." >&2
+        echo "       run setup-tumpa-agent first." >&2
+        exit 1
+      fi
+
+      if launchctl print "${DOMAIN}/${LABEL}" >/dev/null 2>&1; then
+        echo "--> launchctl kickstart -k ${DOMAIN}/${LABEL}"
+        launchctl kickstart -k "${DOMAIN}/${LABEL}"
+      else
+        echo "--> agent not loaded, bootstrapping"
+        launchctl bootstrap "$DOMAIN" "$TARGET"
+        launchctl enable "${DOMAIN}/${LABEL}" >/dev/null 2>&1 || true
+      fi
+
+      # Verify.
+      sleep 1
+      if launchctl print "${DOMAIN}/${LABEL}" >/dev/null 2>&1; then
+        echo "==> Done. Agent socket: ~/.tumpa/agent.sock"
+        echo "    Logs: $LOG_PATH"
+      else
+        echo "==> WARNING: agent did not register. Check $LOG_PATH" >&2
+        exit 1
+      fi
+    SCRIPT
+    chmod 0755, bin/"restart-tumpa-agent"
+
+    (bin/"stop-tumpa-agent").write <<~SCRIPT
+      #!/bin/bash
+      # Stop the Tumpa user LaunchAgent. The plist stays installed, so
+      # the agent starts again at next login; use restart-tumpa-agent
+      # to start it again sooner.
+      set -euo pipefail
+
+      LABEL="in.kushaldas.tumpa.agent"
+      DOMAIN="gui/$(id -u)"
+
+      if launchctl print "${DOMAIN}/${LABEL}" >/dev/null 2>&1; then
+        echo "--> launchctl bootout ${DOMAIN}/${LABEL}"
+        launchctl bootout "${DOMAIN}/${LABEL}"
+        echo "==> Stopped. Start it again with: restart-tumpa-agent"
+      else
+        echo "==> Agent is not running."
+      fi
+    SCRIPT
+    chmod 0755, bin/"stop-tumpa-agent"
   end
 
   def caveats
@@ -165,6 +223,10 @@ class TumpaCli < Formula
           - install ~/Library/LaunchAgents/in.kushaldas.tumpa.agent.plist
           - bootstrap and start it via `launchctl bootstrap gui/$(id -u)`
 
+        To restart or stop the agent:
+          restart-tumpa-agent   # restart (or start) the agent
+          stop-tumpa-agent      # stop it until next login
+
         To uninstall the agent later:
           launchctl bootout gui/$(id -u)/in.kushaldas.tumpa.agent
           rm ~/Library/LaunchAgents/in.kushaldas.tumpa.agent.plist
@@ -172,14 +234,14 @@ class TumpaCli < Formula
       MACOS
     end
     s << <<~EOS
-      Add to your shell profile (~/.zshrc):
+      Add to your shell profile (~/.zprofile):
         export SSH_AUTH_SOCK="$HOME/.tumpa/tcli-ssh.sock"
 
       Import your OpenPGP key:
         tcli import /path/to/your/secret-key.asc
 
       Configure git:
-        git config --global gpg.program tcli
+        git config --global gpg.program tclig
         git config --global user.signingkey <FINGERPRINT>
         git config --global commit.gpgsign true
     EOS
