@@ -251,5 +251,11 @@ class TumpaCli < Formula
   test do
     assert_match "tcli", shell_output("#{bin}/tcli --help 2>&1")
     assert_match "tpass", shell_output("#{bin}/tpass --help 2>&1")
+
+    if OS.mac?
+      %w[setup-tumpa-agent restart-tumpa-agent stop-tumpa-agent].each do |script|
+        assert_predicate bin/script, :executable?
+      end
+    end
   end
 end
