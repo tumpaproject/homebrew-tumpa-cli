@@ -162,6 +162,9 @@ class TumpaCli < Formula
         exit 1
       fi
 
+      # Ensure the log destination exists and is writable.
+      mkdir -p "$(dirname "$LOG_PATH")"
+
       if launchctl print "${DOMAIN}/${LABEL}" >/dev/null 2>&1; then
         echo "--> launchctl kickstart -k ${DOMAIN}/${LABEL}"
         launchctl kickstart -k "${DOMAIN}/${LABEL}"
